@@ -7,3 +7,5 @@ langchain-huggingface==0.1.2
 langchain_postgres==0.0.13
 psycopg2==2.9.10
 langchain-ollama==0.2.3
+pydantic==0.0.1.dev3
+sqlalchemy==2.0.38

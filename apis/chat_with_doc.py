@@ -1,18 +1,31 @@
 from fastapi import Depends, APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from services.utils import PDF_OPERATIONS
-import os, base64
-# from db.database import fetch_prompts, insert_result_pdf, update_prompt, insert_prompt, delete_prompt
+from services.utils import create_embeddings, ask_question
+from db.database import pdf_db_connect, engine
+from sqlalchemy.orm import Session
+from models.model import Insert_PDF_Record
+from models import model
+import os, base64, datetime
 
 router = APIRouter(tags=["Do not look at this now"], responses={404: {"description": "Not found"}})
 
 @router.post("/upload_file", responses={200: {"headers": {"Access-Control-Allow-Origin": "*"}}})
-async def upload_document(request: Request):
+async def upload_document(request: Request, db: Session = Depends(pdf_db_connect)):
     data = await request.json()
 
     try:
-        PDF_OPERATIONS(data['base64']).create_embeddings()
+        model.Base.metadata.create_all(bind=engine)
+        embedding_id = create_embeddings(data['filename'].replace(" ", "_"), data['base64'])
+
+        pdf_model = Insert_PDF_Record()
+        pdf_model.filename = data['filename'].replace(" ", "_")
+        pdf_model.embedding_id = embedding_id
+        pdf_model.uploaded_on = datetime.datetime.now()
+
+        db.add(pdf_model)
+        db.commit()
+
         return JSONResponse(status_code=200, content={"status_code": 200, "message": "Data has been extracted from PDF and Embeddings has been saved in DB!!"})
     except Exception as e:
         print(e)
@@ -23,19 +36,10 @@ async def upload_document(request: Request):
 async def ques_ask(request: Request):
     data = await request.json()
 
-    response = PDF_OPERATIONS(data['prompt']).ask_question()
-    # try:
-    #     response = PDF_OPERATIONS(data['prompt']).ask_question()
-    #     return JSONResponse(status_code=200, content={"status_code": 200, "response": response})
-    # except Exception as e:
-    #     print(e)
-    #     return JSONResponse(status_code=401, content={"status_code": 401, "message": "Error while data extraction."})
-    
-
-@router.get("/", responses={200: {"headers": {"Access-Control-Allow-Origin": "*"}}})
-async def root():
     try:
-        return JSONResponse(status_code=200, content={"status_code": 200, "message": "App is working !!"})
+        del data['uploaded_on']
+        response = ask_question(data)
+        return JSONResponse(status_code=200, content={"status_code": 200, "response": response})
     except Exception as e:
-        # raise HTTPException
-        return JSONResponse(status_code=401, content={"status_code": 401, "message": str(e)})
+        print(e)
+        return JSONResponse(status_code=401, content={"status_code": 401, "message": "Error while data extraction."})

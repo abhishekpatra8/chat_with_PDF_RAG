@@ -1,9 +1,21 @@
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 from dotenv import load_dotenv
-import psycopg2, os
+import os
 
 load_dotenv()
 
-def db_connect():
-    # conn = psycopg2.connect(host=os.getenv("POSTGRE_HOST"), user=os.getenv("POSTGRE_USER"), password=os.getenv("POSTGRE_PASS"), dbname=os.getenv("POSTGRE_DB"))
-    # return conn
-    pass
+engine = create_engine(os.getenv("DATABASE_URL"), connect_args={"check_same_thread": False})
+
+SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+
+Base = declarative_base()
+
+
+def pdf_db_connect():
+    try:
+        pdf_db = SessionLocal()
+        yield pdf_db
+    except:
+        pdf_db.close()
