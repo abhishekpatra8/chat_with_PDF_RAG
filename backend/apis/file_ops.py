@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter, Request, HTTPException
+from fastapi import Depends, APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from db.database import pdf_db_connect
@@ -15,7 +15,7 @@ async def upload_document(db: Session = Depends(pdf_db_connect)):
         return JSONResponse(status_code=200, content={"status_code": 200, "details": jsonable_encoder(records)})
     except Exception as e:
         print(e)
-        return JSONResponse(status_code=401, content={"status_code": 401, "message": "Error while data extraction from DB."})
+        raise HTTPException(status_code=401, detail="Error while data extraction from DB.")
     
 
 @router.get("/")
