@@ -16,3 +16,8 @@ async def upload_document(db: Session = Depends(pdf_db_connect)):
     except Exception as e:
         print(e)
         return JSONResponse(status_code=401, content={"status_code": 401, "message": "Error while data extraction from DB."})
+    
+
+@router.get("/")
+async def index():
+    return JSONResponse(status_code=200, content={"status_code": 200, "message": "App is working good !!"})

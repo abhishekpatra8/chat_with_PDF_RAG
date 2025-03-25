@@ -59,7 +59,8 @@ def ask_question(data):
     setup = RunnableParallel(context=vectorstore.as_retriever(), question=RunnablePassthrough())
 
     template = """You are acting as a Request For Proposal(RFP) Writer. You have to answer based on the given question and available context. 
-                And be very specific while answering the question. Be very precise to one line answer, and no other detailed information. \n \
+                And be very specific while answering the question. Be very precise to the answer, and no unnecessarily information to be given in result.
+                Do not mention kind of document specified or and document id in the answer or any kinf of external information. \n \
                 If you can't answer the question, just say, I don't know. \n 
                 Context: {context} \n\n
                 Question: {question}"""
