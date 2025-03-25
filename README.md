@@ -108,6 +108,12 @@ chat_with_PDF_RAG
 └── README.md
 ```
 
+## Test Structure
+
+- The test cases are located in the backend/tests directory. It includes unit tests and integration tests covering various modules:
+- **Unit Tests**: Tests for individual functions and components.
+- **Integration Tests**: Tests for the API endpoints and interactions between different components.
+
 ## RAG Flow Diagram
 ![alt text](rag_flow.png)
 
